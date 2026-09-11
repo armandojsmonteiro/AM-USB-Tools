@@ -1,9 +1,13 @@
 name: build
 
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -17,18 +21,26 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.7'
+          gradle-version: "8.9"
 
-      - name: Build APK
-        run: gradle assembleDebug --stacktrace --no-daemon
+      - name: Check project
+        run: |
+          test -f settings.gradle.kts
+          test -f build.gradle.kts
+          test -f app/build.gradle.kts
+          test -f app/src/main/AndroidManifest.xml
 
-      - name: Upload APK
+      - name: Build V6 APK
+        run: gradle --no-daemon :app:assembleDebug --stacktrace
+
+      - name: Upload V6 APK
         uses: actions/upload-artifact@v4
         with:
-          name: AM-USB-Tools-V5
+          name: AM-USB-Tools-V6
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
