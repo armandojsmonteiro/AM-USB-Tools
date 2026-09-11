@@ -40,11 +40,11 @@ jobs:
       - name: Rename APK
         run: |
           set -e
-          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/AM_USB_Tools_V1.apk
+          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/AM_USB_Tools_V2.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AM-USB-Tools-V1
-          path: app/build/outputs/apk/debug/AM_USB_Tools_V1.apk
+          name: AM-USB-Tools-V2
+          path: app/build/outputs/apk/debug/AM_USB_Tools_V2.apk
           if-no-files-found: error
