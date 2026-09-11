@@ -1,16 +1,13 @@
-name: Build AM USB Tools APK
+name: build
 
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
-
-permissions:
-  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,14 +16,15 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.9'
+          gradle-version: "8.7"
 
       - name: Verify Android project
+        shell: bash
         run: |
           set -e
           test -f settings.gradle.kts
@@ -35,16 +33,13 @@ jobs:
           test -f app/src/main/AndroidManifest.xml
 
       - name: Build APK
-        run: gradle :app:assembleDebug --no-daemon
+        run: gradle --no-daemon assembleDebug
 
       - name: Rename APK
-        run: |
-          set -e
-          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/AM_USB_Tools_V2.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk AM_USB_Tools_V3.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AM-USB-Tools-V2
-          path: app/build/outputs/apk/debug/AM_USB_Tools_V2.apk
-          if-no-files-found: error
+          name: AM_USB_Tools_V3
+          path: AM_USB_Tools_V3.apk
