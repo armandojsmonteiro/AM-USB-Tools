@@ -46,11 +46,11 @@ jobs:
           mkdir -p project
           unzip -o "$ZIP_FILE" -d project
 
-          Conteúdo do projeto:"
+          echo "Conteúdo do projeto:"
           find project -maxdepth 3 -type f | sort
 
-          if [ ! -f "project/settings.gradle.kts" echo "] && [ ! -f "project/settings.gradle" ]; then
-            echo "ERRO: O ZIP não contém um nameeto Gradle válido."
+          if [ ! -f "project/settings.gradle.kts" ] && [ ! -f "project/settings.gradle" ]; then
+            echo "ERRO: O ZIP não contém um projeto Gradle válido."
             exit 1
           fi
 
@@ -58,15 +58,20 @@ jobs:
 
       - name: Construir APK
         shell: bash
-        rname|
+        run: |
           set -e
           cd "$PROJECT_DIR"
-          gradle :app:asnameleDebug --no-daemon --stacktrace
+          gradle :app:assembleDebug --no-daemon --stacktrace
+
+      - name: Renomear APK
+        shell: bash
+        run: |
+          set -e
+          cp "$PROJECT_DIR/app/build/outputs/apk/debug/app-debug.apk" "AM USB Tools.apk"
 
       - name: Enviar APK
         uses: actions/upload-artifact@v4
         with:
-          name: AM-USB-Tools-APK-V7
-          path: project/app/build/outputs/apk/debug/app-debug.apk
+          name: AM USB Tools
+          path: "AM USB Tools.apk"
           if-no-files-found: error
-name
