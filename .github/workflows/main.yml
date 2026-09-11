@@ -1,4 +1,4 @@
-name: build
+name: Build AM USB Tools APK
 
 on:
   workflow_dispatch:
@@ -17,30 +17,55 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
+      - name: Configurar Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: '17'
 
-      - name: Set up Gradle
+      - name: Instalar Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.9"
+          gradle-version: '8.9'
 
-      - name: Check project
+      - name: Preparar projeto Android
+        shell: bash
         run: |
-          test -f settings.gradle.kts
-          test -f build.gradle.kts
-          test -f app/build.gradle.kts
-          test -f app/src/main/AndroidManifest.xml
+          set -e
 
-      - name: Build V6 APK
-        run: gradle --no-daemon :app:assembleDebug --stacktrace
+          ZIP_FILE=$(find . -maxdepth 1 -type f -iname 'AM_USB_Tools*.zip' | head -n 1)
 
-      - name: Upload V6 APK
+          if [ -z "$ZIP_FILE" ]; then
+            echo "ERRO: Não foi encontrado o ZIP da AM USB Tools."
+            exit 1
+          fi
+
+          echo "ZIP encontrado: $ZIP_FILE"
+
+          rm -rf project
+          mkdir -p project
+          unzip -o "$ZIP_FILE" -d project
+
+          echo "Conteúdo do projeto:"
+          find project -maxdepth 3 -type f | sort
+
+          if [ ! -f "project/settings.gradle.kts" ] && [ ! -f "project/settings.gradle" ]; then
+            echo "ERRO: O ZIP não contém um projeto Gradle válido."
+            exit 1
+          fi
+
+          echo "PROJECT_DIR=project" >> "$GITHUB_ENV"
+
+      - name: Construir APK
+        shell: bash
+        run: |
+          set -e
+          cd "$PROJECT_DIR"
+          gradle :app:assembleDebug --no-daemon --stacktrace
+
+      - name: Enviar APK
         uses: actions/upload-artifact@v4
         with:
-          name: AM-USB-Tools-V6
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: AM-USB-Tools-APK-V7
+          path: project/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
