@@ -1,10 +1,8 @@
 name: build
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+  push:
 
 jobs:
   build:
@@ -23,13 +21,22 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build APK
+      - name: Verify Android project
         run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
+          set -e
+          test -f settings.gradle.kts
+          test -f build.gradle.kts
+          test -f app/build.gradle.kts
+          test -f app/src/main/AndroidManifest.xml
+
+      - name: Build APK
+        run: ./gradlew assembleDebug
+
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk AM_USB_Tools_V3.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AM-USB-Tools-V4
-          path: app/build/outputs/apk/**/*.apk
+          name: AM_USB_Tools_V3
+          path: AM_USB_Tools_V3.apk
