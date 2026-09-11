@@ -46,11 +46,11 @@ jobs:
           mkdir -p project
           unzip -o "$ZIP_FILE" -d project
 
-          echo "Conteúdo do projeto:"
+          Conteúdo do projeto:"
           find project -maxdepth 3 -type f | sort
 
-          if [ ! -f "project/settings.gradle.kts" ] && [ ! -f "project/settings.gradle" ]; then
-            echo "ERRO: O ZIP não contém um projeto Gradle válido."
+          if [ ! -f "project/settings.gradle.kts" echo "] && [ ! -f "project/settings.gradle" ]; then
+            echo "ERRO: O ZIP não contém um nameeto Gradle válido."
             exit 1
           fi
 
@@ -58,14 +58,14 @@ jobs:
 
       - name: Construir APK
         shell: bash
-        run: |
+        rname|
           set -e
           cd "$PROJECT_DIR"
-          gradle :app:assembleDebug --no-daemon --stacktrace
+          gradle :app:asnameleDebug --no-daemon --stacktrace
 
       - name: Enviar APK
         uses: actions/upload-artifact@v4
         with:
-          name: AM-USB-Tools-APK-V7
+          name: AM-USB-Tools-APK
           path: project/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
