@@ -18,22 +18,45 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Extract V3 project
+        run: |
+          set -e
+          mkdir -p project
+          unzip -o AM_USB_Tools_V3.zip -d project
+
+      - name: Find Android project
+        run: |
+          set -e
+
+          PROJECT_DIR=$(find project -type f -name "settings.gradle.kts" -print -quit | xargs dirname)
+
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "ERRO: settings.gradle.kts não encontrado dentro do ZIP."
+            exit 1
+          fi
+
+          echo "Projeto encontrado em: $PROJECT_DIR"
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: Verify Android project
         run: |
           set -e
-          test -f settings.gradle.kts
-          test -f build.gradle.kts
-          test -f app/build.gradle.kts
-          test -f app/src/main/AndroidManifest.xml
+
+          test -f "$PROJECT_DIR/settings.gradle.kts"
+          test -f "$PROJECT_DIR/build.gradle.kts"
+          test -f "$PROJECT_DIR/app/build.gradle.kts"
+          test -f "$PROJECT_DIR/app/src/main/AndroidManifest.xml"
 
       - name: Build APK
+        working-directory: ${{ env.PROJECT_DIR }}
         run: ./gradlew assembleDebug
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk AM_USB_Tools_V3.apk
+        run: |
+          cp "$PROJECT_DIR/app/build/outputs/apk/debug/app-debug.apk" AM_USB_Tools_V3.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
